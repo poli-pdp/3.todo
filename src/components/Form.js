@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const Form = (props) => {
@@ -8,10 +8,31 @@ const Form = (props) => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newTodo = { id: uuidv4(), title: props.input, completed: false };
-    props.setTodos([...props.todos, newTodo]);
-    props.setInput("");
+    if (props.edit) {
+      updateTodo(edit.id, props.input, edit.completed);
+    } else {
+      const newTodo = { id: uuidv4(), title: props.input, completed: false };
+      props.setTodos([...props.todos, newTodo]);
+      props.setInput("");
+    }
   };
+
+  const updateTodo = (id, title, completed) => {
+    const newTodos = props.todos.map((todo) =>
+      todo.id === id ? { id, title, completed } : todo
+    );
+    props.setTodos(newTodos);
+    props.setEdit(null);
+  };
+
+  const { edit, setInput } = props;
+  useEffect(() => {
+    if (edit) {
+      setInput(edit.title);
+    } else {
+      setInput("");
+    }
+  }, [edit, setInput]);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -23,7 +44,7 @@ const Form = (props) => {
         onChange={handleInputChange}
       />
       <button type="submit" className="button-add">
-        Add
+        {props.edit ? "Edit" : "Add"}
       </button>
     </form>
   );
